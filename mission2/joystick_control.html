@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>SANCAK — Görev 2 Kontrolü</title>
+<style>
+:root {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f4f4f1;
+  --color-border-tertiary: #e5e5e0;
+  --color-border-secondary: #d0d0c8;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #5f5e5a;
+  --color-text-tertiary: #8a8985;
+  --color-text-success: #0F6E56;
+  --border-radius-lg: 12px;
+  --border-radius-md: 8px;
+  --font-sans: -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'SF Mono', Consolas, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  background: var(--color-background-secondary);
+  padding: 20px;
+  min-height: 100vh;
+  color: var(--color-text-primary);
+}
+.container { max-width: 900px; margin: 0 auto; }
+.panel {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 16px;
+}
+.btn {
+  display: flex; align-items: center; justify-content: center;
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  font-size: 12px; font-weight: 500;
+  cursor: pointer; user-select: none;
+  transition: background 0.1s, transform 0.08s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active, .btn.active {
+  background: var(--color-background-secondary);
+  transform: scale(0.95);
+}
+.badge {
+  font-size: 11px; padding: 2px 8px;
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+}
+.log-box {
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--color-text-secondary);
+  height: 120px;
+  overflow-y: auto;
+}
+.log-line { padding: 1px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.log-line:last-child { border-bottom: none; }
+.log-ok   { color: #0F6E56; }
+.log-warn { color: #854F0B; }
+.log-info { color: #185FA5; }
+.log-err  { color: #A13030; }
+</style>
+</head>
+<body>
+<div class="container">
+<div style="display:flex; flex-direction:column; gap:12px; padding:8px 0;">
+
+<div style="display:flex; align-items:center; justify-content:space-between;">
+  <span style="font-size:15px; font-weight:500; color:var(--color-text-primary);">SANCAK Görev 2 Kontrolü</span>
+  <div style="display:flex; gap:6px; align-items:center;">
+    <span id="ws-badge" class="badge" style="background:#F1EFE8;color:#5F5E5A;">●BAĞLANIYOR</span>
+    <span id="mod-badge" class="badge" style="background:#E6F1FB;color:#0C447C;">HAREKET</span>
+    <span id="form-badge" class="badge" style="background:#EEEDFE;color:#3C3489;">V</span>
+    <span id="arm-badge" class="badge" style="background:#F1EFE8;color:#5F5E5A;">YERDE</span>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+
+  <div class="panel">
+    <div style="font-size:11px; color:var(--color-text-secondary); margin-bottom:10px; font-weight:500;">KALKIŞ / İNİŞ</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <button class="btn" id="btn-takeoff" style="height:44px; font-size:13px;" onpointerdown="cmd('takeoff')">
+        Kalk (T)
+      </button>
+      <button class="btn" id="btn-land" style="height:44px; font-size:13px;" onpointerdown="cmd('land')">
+        İn (T)
+      </button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div style="font-size:11px; color:var(--color-text-secondary); margin-bottom:10px; font-weight:500;">MOD SEÇİMİ</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <button class="btn" id="btn-hareket" style="height:44px;" onpointerdown="setMod('HAREKET')">
+        Hareket (H)
+      </button>
+      <button class="btn" id="btn-manevra" style="height:44px;" onpointerdown="setMod('MANEVRA')">
+        Manevra (M)
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<div class="panel">
+  <div style="font-size:11px; color:var(--color-text-secondary); margin-bottom:10px; font-weight:500;">FORMASYON</div>
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+    <button class="btn" id="btn-v"      style="height:40px;" onpointerdown="setForm('V')">V (1)</button>
+    <button class="btn" id="btn-okbasi" style="height:40px;" onpointerdown="setForm('OKBASI')">Okbaşı (2)</button>
+    <button class="btn" id="btn-cizgi"  style="height:40px;" onpointerdown="setForm('CIZGI')">Çizgi (3)</button>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+
+  <div class="panel">
+    <div style="font-size:11px; color:var(--color-text-secondary); margin-bottom:10px; font-weight:500;">HAREKET / PITCH-ROLL</div>
+    <div style="display:grid; grid-template-columns:44px 44px 44px; gap:6px; justify-content:center;">
+      <div></div>
+      <button class="btn" id="btn-w" style="height:44px; width:44px;"
+        onpointerdown="startKey('w')" onpointerup="stopKey('w')" onpointerleave="stopKey('w')">W</button>
+      <div></div>
+      <button class="btn" id="btn-a" style="height:44px; width:44px;"
+        onpointerdown="startKey('a')" onpointerup="stopKey('a')" onpointerleave="stopKey('a')">A</button>
+      <button class="btn" style="height:44px; width:44px; font-size:10px; color:var(--color-text-tertiary);">◎</button>
+      <button class="btn" id="btn-d" style="height:44px; width:44px;"
+        onpointerdown="startKey('d')" onpointerup="stopKey('d')" onpointerleave="stopKey('d')">D</button>
+      <div></div>
+      <button class="btn" id="btn-s" style="height:44px; width:44px;"
+        onpointerdown="startKey('s')" onpointerup="stopKey('s')" onpointerleave="stopKey('s')">S</button>
+      <div></div>
+    </div>
+    <div style="font-size:10px; color:var(--color-text-tertiary); text-align:center; margin-top:6px;">ileri/geri/sol/sağ</div>
+  </div>
+
+  <div class="panel">
+    <div style="font-size:11px; color:var(--color-text-secondary); margin-bottom:10px; font-weight:500;">YAW + İRTİFA</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <button class="btn" style="height:44px;"
+        onpointerdown="startKey('q')" onpointerup="stopKey('q')" onpointerleave="stopKey('q')">Q — Yaw Sol</button>
+      <button class="btn" style="height:44px;"
+        onpointerdown="startKey('e')" onpointerup="stopKey('e')" onpointerleave="stopKey('e')">E — Yaw Sağ</button>
+      <button class="btn" style="height:44px;"
+        onpointerdown="startKey('r')" onpointerup="stopKey('r')" onpointerleave="stopKey('r')">R — Yukarı</button>
+      <button class="btn" style="height:44px;"
+        onpointerdown="startKey('f')" onpointerup="stopKey('f')" onpointerleave="stopKey('f')">F — Aşağı</button>
+    </div>
+    <div style="font-size:10px; color:var(--color-text-tertiary); text-align:center; margin-top:6px;">merkez sabit, formasyon döner</div>
+  </div>
+
+</div>
+
+<div class="panel">
+  <div style="font-size:11px; color:var(--color-text-secondary); margin-bottom:10px; font-weight:500;">MANEVRA MODU (M aktifken)</div>
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+    <button class="btn" style="height:40px; font-size:11px;"
+      onpointerdown="startKey('w')" onpointerup="stopKey('w')" onpointerleave="stopKey('w')">W — Pitch İleri</button>
+    <button class="btn" style="height:40px; font-size:11px;"
+      onpointerdown="startKey('s')" onpointerup="stopKey('s')" onpointerleave="stopKey('s')">S — Pitch Geri</button>
+    <button class="btn" style="height:40px; font-size:11px;"
+      onpointerdown="oneShotKey('v')">V — Sıfırla</button>
+    <button class="btn" style="height:40px; font-size:11px;"
+      onpointerdown="startKey('a')" onpointerup="stopKey('a')" onpointerleave="stopKey('a')">A — Roll Sol</button>
+    <button class="btn" style="height:40px; font-size:11px;"
+      onpointerdown="startKey('d')" onpointerup="stopKey('d')" onpointerleave="stopKey('d')">D — Roll Sağ</button>
+    <div style="display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--color-text-tertiary);">merkez sabit</div>
+  </div>
+</div>
+
+<div>
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+    <span style="font-size:11px; color:var(--color-text-secondary); font-weight:500;">Terminal Logu</span>
+    <button class="btn" style="height:24px; padding:0 10px; font-size:11px;" onpointerdown="clearLog()">Temizle</button>
+  </div>
+  <div class="log-box" id="log-box"></div>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px;">
+  <div style="background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); padding:10px; text-align:center;">
+    <div style="font-size:11px; color:var(--color-text-secondary);">Sürü Merkezi</div>
+    <div style="font-size:13px; font-weight:500; color:var(--color-text-primary);" id="stat-pos">0.0, 0.0, 8.0</div>
+  </div>
+  <div style="background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); padding:10px; text-align:center;">
+    <div style="font-size:11px; color:var(--color-text-secondary);">Yaw</div>
+    <div style="font-size:13px; font-weight:500; color:var(--color-text-primary);" id="stat-yaw">0°</div>
+  </div>
+  <div style="background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); padding:10px; text-align:center;">
+    <div style="font-size:11px; color:var(--color-text-secondary);">Durum</div>
+    <div style="font-size:13px; font-weight:500; color:var(--color-text-success);" id="stat-status">Bağlantı bekleniyor</div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  SANCAK — Görev 2 Sanal Kumanda
+//  Gerçek WebSocket bağlantısı ile ROS2'ye bağlanır.
+// ════════════════════════════════════════════════
+
+const WS_URL = 'ws://localhost:8765';
+
+const state = {
+  armed: false,
+  mod: 'HAREKET',
+  form: 'V',
+  yaw: 0,            // rad
+  lx: 0, ly: 0, lz: 8,   // sürü merkezi (bilgi amaçlı ekran için)
+  pressed: new Set(),
+};
+
+let ws = null;
+let wsReady = false;
+
+// ─── WebSocket bağlantısı ──────────────────────────
+function connectWS() {
+  try {
+    ws = new WebSocket(WS_URL);
+  } catch(e) {
+    setTimeout(connectWS, 3000);
+    return;
+  }
+  ws.onopen = () => {
+    wsReady = true;
+    setBadge('ws-badge', '● BAĞLI', '#E1F5EE', '#085041');
+    document.getElementById('stat-status').textContent = 'Hazır';
+    log('WebSocket bağlandı (ws://localhost:8765)', 'ok');
+  };
+  ws.onclose = () => {
+    wsReady = false;
+    setBadge('ws-badge', '● KOPUK', '#FBE8E8', '#A13030');
+    document.getElementById('stat-status').textContent = 'Bağlantı kesildi';
+    log('WebSocket koptu, yeniden bağlanılıyor...', 'warn');
+    setTimeout(connectWS, 2000);
+  };
+  ws.onerror = () => {};
+  ws.onmessage = (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      if (data.log) log(`[ROS] ${data.log}`, 'info');
+      if (data.pos) {
+        state.lx = data.pos.x; state.ly = data.pos.y; state.lz = data.pos.z;
+        updateStats();
+      }
+      if (data.yaw !== undefined) {
+        state.yaw = data.yaw;
+        updateStats();
+      }
+      if (data.armed !== undefined) {
+        state.armed = data.armed;
+        updateBadges();
+      }
+    } catch(err) {}
+  };
+}
+
+function send(type, payload = {}) {
+  if (!wsReady) {
+    log('WebSocket bağlı değil — komut gönderilemedi', 'err');
+    return;
+  }
+  ws.send(JSON.stringify({ type, ...payload, ts: Date.now() }));
+}
+
+// ─── UI yardımcıları ───────────────────────────────
+function setBadge(id, text, bg, color) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.style.background = bg;
+  el.style.color = color;
+}
+
+function log(msg, type='') {
+  const box = document.getElementById('log-box');
+  const line = document.createElement('div');
+  line.className = 'log-line' + (type ? ' log-'+type : '');
+  const t = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  line.textContent = `[${t}] ${msg}`;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+  while (box.children.length > 80) box.removeChild(box.children[0]);
+}
+
+function clearLog() {
+  document.getElementById('log-box').innerHTML = '';
+}
+
+function updateStats() {
+  document.getElementById('stat-pos').textContent =
+    `${state.lx.toFixed(1)}, ${state.ly.toFixed(1)}, ${state.lz.toFixed(1)}`;
+  document.getElementById('stat-yaw').textContent =
+    `${Math.round(state.yaw * 180 / Math.PI)}°`;
+}
+
+function updateBadges() {
+  document.getElementById('mod-badge').textContent = state.mod;
+  document.getElementById('mod-badge').style.background = state.mod === 'HAREKET' ? '#E6F1FB' : '#FAEEDA';
+  document.getElementById('mod-badge').style.color      = state.mod === 'HAREKET' ? '#0C447C' : '#633806';
+
+  document.getElementById('form-badge').textContent = state.form;
+  document.getElementById('arm-badge').textContent  = state.armed ? 'HAVADA' : 'YERDE';
+  document.getElementById('arm-badge').style.background = state.armed ? '#E1F5EE' : '#F1EFE8';
+  document.getElementById('arm-badge').style.color      = state.armed ? '#085041' : '#5F5E5A';
+
+  ['v','okbasi','cizgi'].forEach(f => {
+    const btn = document.getElementById('btn-'+f);
+    const tip = f.toUpperCase();
+    if (state.form === tip) {
+      btn.style.background = '#EEEDFE';
+      btn.style.borderColor = '#534AB7';
+      btn.style.color = '#3C3489';
+    } else {
+      btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = '';
+    }
+  });
+
+  ['hareket','manevra'].forEach(m => {
+    const btn = document.getElementById('btn-'+m);
+    const tip = m.toUpperCase();
+    if (state.mod === tip) {
+      btn.style.background = tip === 'HAREKET' ? '#E6F1FB' : '#FAEEDA';
+      btn.style.borderColor = tip === 'HAREKET' ? '#185FA5' : '#854F0B';
+      btn.style.color = tip === 'HAREKET' ? '#0C447C' : '#633806';
+    } else {
+      btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = '';
+    }
+  });
+}
+
+// ─── Komutlar ──────────────────────────────────────
+function cmd(action) {
+  if (action === 'takeoff') {
+    send('takeoff');
+    log('KALKIŞ komutu gönderildi', 'ok');
+  } else if (action === 'land') {
+    send('land');
+    log('İNİŞ komutu gönderildi', 'warn');
+  }
+}
+
+function setMod(mod) {
+  state.mod = mod;
+  send('mode_change', { mode: mod });
+  log(`Mod → ${mod}`, 'info');
+  updateBadges();
+}
+
+function setForm(form) {
+  if (state.form === form) return;
+  state.form = form;
+  send('formation_change', { formation: form });
+  log(`Formasyon → ${form}`, 'info');
+  updateBadges();
+}
+
+function oneShotKey(k) {
+  // Tek seferlik tuş (V gibi)
+  send('key_press', { key: k });
+  log(`[${state.mod}] ${k.toUpperCase()} (sıfırla)`, 'ok');
+}
+
+// ─── Tuş basılı/bırakıldı mantığı ──────────────────
+function startKey(k) {
+  if (state.pressed.has(k)) return;
+  state.pressed.add(k);
+  send('key_down', { key: k });
+
+  const labels = {
+    w: state.mod==='HAREKET' ? 'İLERİ' : 'PİTCH İLERİ',
+    s: state.mod==='HAREKET' ? 'GERİ' : 'PİTCH GERİ',
+    a: state.mod==='HAREKET' ? 'SOL'  : 'ROLL SOL',
+    d: state.mod==='HAREKET' ? 'SAĞ'  : 'ROLL SAĞ',
+    q: 'YAW SOL', e: 'YAW SAĞ', r: 'YUKARI', f: 'AŞAĞI',
+  };
+  log(`[${state.mod}] ${labels[k] || k.toUpperCase()}`, 'info');
+}
+
+function stopKey(k) {
+  if (!state.pressed.has(k)) return;
+  state.pressed.delete(k);
+  send('key_up', { key: k });
+}
+
+// Klavyeden de tetikleme (bonus)
+document.addEventListener('keydown', (ev) => {
+  const k = ev.key.toLowerCase();
+  if (ev.repeat) return;
+  if ('wasdqerf'.includes(k)) startKey(k);
+  else if (k === 'v') oneShotKey('v');
+  else if (k === 'h') setMod('HAREKET');
+  else if (k === 'm') setMod('MANEVRA');
+  else if (k === 't') state.armed ? cmd('land') : cmd('takeoff');
+  else if (k === '1') setForm('V');
+  else if (k === '2') setForm('OKBASI');
+  else if (k === '3') setForm('CIZGI');
+});
+document.addEventListener('keyup', (ev) => {
+  const k = ev.key.toLowerCase();
+  if ('wasdqerf'.includes(k)) stopKey(k);
+});
+
+// ─── Başlangıç ────────────────────────────────────
+log('SANCAK Görev 2 kontrolü hazır.', 'ok');
+log('Bağlantı bekleniyor — joystick_bridge.py başlatın', 'info');
+updateBadges();
+updateStats();
+connectWS();
+</script>
+</body>
+</html>
