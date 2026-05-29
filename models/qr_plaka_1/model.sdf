@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="qr_plaka_1">
+    <static>true</static>
+    <link name="link">
+      <visual name="visual">
+        <geometry>
+          <box><size>1.2 1.2 0.01</size></box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://qr_plaka_1/materials/scripts</uri>
+            <uri>model://qr_plaka_1/materials/textures</uri>
+            <name>qr_plaka_1/QRMaterial</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <box><size>1.2 1.2 0.01</size></box>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

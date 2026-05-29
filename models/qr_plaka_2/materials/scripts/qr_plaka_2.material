@@ -1,0 +1,13 @@
+material qr_plaka_2/QRMaterial
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture qr_2.png
+      }
+    }
+  }
+}
